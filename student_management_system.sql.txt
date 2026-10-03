@@ -1,0 +1,297 @@
+CREATE DATABASE IF NOT EXISTS student_management;
+USE student_management;
+
+-- =========================================
+-- 1. STUDENTS TABLE
+-- =========================================
+
+CREATE TABLE students (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE,
+    phone VARCHAR(15),
+    gender VARCHAR(10),
+    date_of_birth DATE,
+    city VARCHAR(50)
+);
+
+-- =========================================
+-- 2. COURSES TABLE
+-- =========================================
+
+CREATE TABLE courses (
+    course_id INT PRIMARY KEY AUTO_INCREMENT,
+    course_name VARCHAR(100) NOT NULL,
+    department VARCHAR(100),
+    duration_months INT,
+    fees DECIMAL(10,2)
+);
+
+-- =========================================
+-- 3. ENROLLMENTS TABLE
+-- =========================================
+
+CREATE TABLE enrollments (
+    enrollment_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
+    enrollment_date DATE,
+    marks DECIMAL(5,2),
+    grade VARCHAR(5),
+    status VARCHAR(20),
+
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);
+
+-- =========================================
+-- 4. INSERT STUDENT DATA
+-- =========================================
+
+INSERT INTO students
+(first_name, last_name, email, phone, gender, date_of_birth, city)
+VALUES
+('Aarav', 'Sharma', 'aarav.sharma@gmail.com', '9876543210', 'Male', '2002-05-14', 'Pune'),
+('Priya', 'Patil', 'priya.patil@gmail.com', '9876543211', 'Female', '2001-08-22', 'Mumbai'),
+('Rahul', 'Deshmukh', 'rahul.deshmukh@gmail.com', '9876543212', 'Male', '2002-01-10', 'Nashik'),
+('Sneha', 'Joshi', 'sneha.joshi@gmail.com', '9876543213', 'Female', '2003-03-18', 'Jalgaon'),
+('Rohan', 'Kulkarni', 'rohan.kulkarni@gmail.com', '9876543214', 'Male', '2001-11-05', 'Pune'),
+('Neha', 'Shinde', 'neha.shinde@gmail.com', '9876543215', 'Female', '2002-07-27', 'Nagpur'),
+('Akash', 'More', 'akash.more@gmail.com', '9876543216', 'Male', '2003-02-15', 'Aurangabad'),
+('Pooja', 'Pawar', 'pooja.pawar@gmail.com', '9876543217', 'Female', '2001-12-30', 'Nashik'),
+('Vikas', 'Jadhav', 'vikas.jadhav@gmail.com', '9876543218', 'Male', '2002-09-12', 'Mumbai'),
+('Kavya', 'Borse', 'kavya.borse@gmail.com', '9876543219', 'Female', '2003-06-08', 'Jalgaon');
+
+-- =========================================
+-- 5. INSERT COURSE DATA
+-- =========================================
+
+INSERT INTO courses
+(course_name, department, duration_months, fees)
+VALUES
+('Python Data Science', 'Computer Science', 6, 35000),
+('Java Full Stack', 'Computer Science', 8, 45000),
+('Data Analytics', 'Information Technology', 6, 30000),
+('Web Development', 'Computer Science', 5, 28000),
+('Cloud Computing', 'Information Technology', 6, 40000),
+('Software Testing', 'Information Technology', 4, 22000);
+
+-- =========================================
+-- 6. INSERT ENROLLMENT DATA
+-- =========================================
+
+INSERT INTO enrollments
+(student_id, course_id, enrollment_date, marks, grade, status)
+VALUES
+(1, 1, '2025-06-10', 88.50, 'A', 'Completed'),
+(2, 3, '2025-06-12', 76.00, 'B', 'Completed'),
+(3, 2, '2025-07-05', 91.00, 'A', 'Completed'),
+(4, 1, '2025-07-15', 84.00, 'A', 'Completed'),
+(5, 4, '2025-08-01', 69.50, 'C', 'Active'),
+(6, 3, '2025-08-10', 82.00, 'A', 'Completed'),
+(7, 5, '2025-08-20', 73.50, 'B', 'Active'),
+(8, 6, '2025-09-01', 79.00, 'B', 'Completed'),
+(9, 2, '2025-09-12', 87.50, 'A', 'Completed'),
+(10, 1, '2025-09-20', 94.00, 'A', 'Active'),
+(2, 1, '2025-10-05', 81.00, 'A', 'Active'),
+(5, 3, '2025-10-10', 72.00, 'B', 'Active');
+
+-- =========================================
+-- 7. BASIC READ QUERIES
+-- =========================================
+
+SELECT * FROM students;
+
+SELECT student_id, first_name, last_name, city
+FROM students;
+
+SELECT *
+FROM students
+WHERE city = 'Pune';
+
+SELECT first_name, last_name, city
+FROM students
+WHERE gender = 'Female';
+
+SELECT student_id, marks, grade
+FROM enrollments
+WHERE marks > 80;
+
+-- =========================================
+-- 8. ORDER BY
+-- =========================================
+
+SELECT student_id, marks, grade
+FROM enrollments
+ORDER BY marks DESC;
+
+SELECT student_id, marks, grade
+FROM enrollments
+ORDER BY marks ASC;
+
+-- =========================================
+-- 9. JOIN REPORTS
+-- =========================================
+
+SELECT
+    s.student_id,
+    CONCAT(s.first_name, ' ', s.last_name) AS student_name,
+    c.course_name,
+    e.enrollment_date,
+    e.marks,
+    e.grade,
+    e.status
+FROM students s
+INNER JOIN enrollments e
+    ON s.student_id = e.student_id
+INNER JOIN courses c
+    ON e.course_id = c.course_id;
+
+-- =========================================
+-- 10. AGGREGATE FUNCTIONS
+-- =========================================
+
+SELECT COUNT(*) AS total_students
+FROM students;
+
+SELECT COUNT(*) AS total_enrollments
+FROM enrollments;
+
+SELECT ROUND(AVG(marks), 2) AS average_marks
+FROM enrollments;
+
+-- =========================================
+-- 11. GROUP BY REPORTS
+-- =========================================
+
+SELECT
+    c.course_name,
+    COUNT(e.student_id) AS total_students
+FROM courses c
+LEFT JOIN enrollments e
+    ON c.course_id = e.course_id
+GROUP BY c.course_id, c.course_name
+ORDER BY total_students DESC;
+
+SELECT
+    c.course_name,
+    ROUND(AVG(e.marks), 2) AS average_marks
+FROM courses c
+INNER JOIN enrollments e
+    ON c.course_id = e.course_id
+GROUP BY c.course_id, c.course_name
+ORDER BY average_marks DESC;
+
+SELECT
+    grade,
+    COUNT(*) AS total_students
+FROM enrollments
+GROUP BY grade
+ORDER BY grade;
+
+SELECT
+    status,
+    COUNT(*) AS total_enrollments
+FROM enrollments
+GROUP BY status;
+
+-- =========================================
+-- 12. CUSTOM REPORTS
+-- =========================================
+
+-- Top 3 Students
+
+SELECT
+    CONCAT(s.first_name, ' ', s.last_name) AS student_name,
+    c.course_name,
+    e.marks,
+    e.grade
+FROM students s
+INNER JOIN enrollments e
+    ON s.student_id = e.student_id
+INNER JOIN courses c
+    ON e.course_id = c.course_id
+ORDER BY e.marks DESC
+LIMIT 3;
+
+-- Active Students
+
+SELECT
+    CONCAT(s.first_name, ' ', s.last_name) AS student_name,
+    c.course_name,
+    e.marks,
+    e.grade,
+    e.status
+FROM students s
+INNER JOIN enrollments e
+    ON s.student_id = e.student_id
+INNER JOIN courses c
+    ON e.course_id = c.course_id
+WHERE e.status = 'Active'
+ORDER BY e.marks DESC;
+
+-- City-wise Student Report
+
+SELECT
+    city,
+    COUNT(*) AS total_students
+FROM students
+GROUP BY city
+ORDER BY total_students DESC;
+
+-- Course Performance Report
+
+SELECT
+    c.course_name,
+    COUNT(e.enrollment_id) AS total_students,
+    ROUND(AVG(e.marks), 2) AS average_marks
+FROM courses c
+LEFT JOIN enrollments e
+    ON c.course_id = e.course_id
+GROUP BY c.course_id, c.course_name
+ORDER BY average_marks DESC;
+
+-- =========================================
+-- 13. HAVING
+-- =========================================
+
+SELECT
+    c.course_name,
+    COUNT(e.enrollment_id) AS total_students
+FROM courses c
+LEFT JOIN enrollments e
+    ON c.course_id = e.course_id
+GROUP BY c.course_id, c.course_name
+HAVING COUNT(e.enrollment_id) >= 2
+ORDER BY total_students DESC;
+
+-- =========================================
+-- 14. CASE EXPRESSION
+-- =========================================
+
+SELECT
+    student_id,
+    marks,
+    CASE
+        WHEN marks >= 85 THEN 'Excellent'
+        WHEN marks >= 70 THEN 'Good'
+        ELSE 'Needs Improvement'
+    END AS performance
+FROM enrollments
+ORDER BY marks DESC;
+
+-- =========================================
+-- 15. FINAL VERIFICATION
+-- =========================================
+
+SELECT COUNT(*) AS total_students
+FROM students;
+
+SELECT COUNT(*) AS total_courses
+FROM courses;
+
+SELECT COUNT(*) AS total_enrollments
+FROM enrollments;
+
+SHOW TABLES;
